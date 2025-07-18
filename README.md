@@ -327,15 +327,30 @@ Each defect class has a distinct bright color for easy identification:
 
 ## Pre-trained Model
 
-### Download
-The pre-trained model `dacl10k_ninja_new_.pth` should be placed in the project root directory.
+### Model Files Notice
+**Important:** Model files (`.pth` files) are not included in this repository due to GitHub's file size limitations. 
 
-### Model Specifications
-- **Training Dataset:** DACL10K
-- **Architecture:** DeepLabV3+ (ResNet34)
-- **Input Size:** 512×512×3
-- **Output:** 20-channel probability map
-- **Performance:** Optimized for concrete defect detection
+### Download Pre-trained Models
+You can download the pre-trained models from the following sources:
+
+1. **Primary Model:** `dacl10k_ninja_new.pth` (175MB)
+   - DeepLabV3+ with ResNet101 encoder
+   - Trained on DACL10K dataset
+   - Best performance for concrete defect segmentation
+
+2. **Alternative Models:**
+   - `dacl10k_deeplabv3plus_resnet34.pth` (86MB) - Lighter version
+   - `dacl10k_deeplabv3plus_resnet50.pth` (103MB) - Medium complexity
+   - `dacl10k_unetplusplus_efficientnet_b5_ver1.pth` (123MB) - U-Net++ variant
+
+### Model Placement
+Place the downloaded model files in the project root directory:
+```
+project_bridge/
+├── dacl10k_ninja_new.pth          # Primary model
+├── dacl10k_deeplabv3plus_resnet34.pth  # Alternative model
+└── ... (other project files)
+```
 
 ### Usage with Pre-trained Model
 ```python
@@ -401,6 +416,16 @@ python check_dataset.py
    - Ensure input video format is supported
    - Check available disk space for output
    - Verify video codec compatibility
+
+4. **Missing Model Files**
+   - Download the required `.pth` model files separately
+   - Place them in the project root directory
+   - Check file names match exactly with the script references
+
+5. **Git Large File Issues**
+   - Model files are excluded from git (see `.gitignore`)
+   - Use Git LFS for large files if needed
+   - Download models separately from the repository
 
 ### Dependencies Issues
 ```bash
