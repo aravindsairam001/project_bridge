@@ -331,7 +331,8 @@ Each defect class has a distinct bright color for easy identification:
 **Important:** Model files (`.pth` files) are not included in this repository due to GitHub's file size limitations. 
 
 ### Download Pre-trained Models
-You can download the pre-trained models from the following sources:
+You can download the pre-trained models from the following source:
+https://drive.google.com/drive/folders/1AMVAouxFGw9KZ7dEi4m9msYORE0EQC4G?usp=share_link
 
 1. **Primary Model:** `dacl10k_ninja_new.pth` (175MB)
    - DeepLabV3+ with ResNet101 encoder
