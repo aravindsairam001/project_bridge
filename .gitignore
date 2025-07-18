@@ -1,3 +1,4 @@
+# Large files and directories
 /ARCHITECTURE_ANALYSIS.md
 /Datasets
 /Models
@@ -9,3 +10,57 @@
 /prediction_overlay_6131.jpg
 /project_bridge.code-workspace
 /training_interrupt.log
+
+# Model files (prevent large files from being committed)
+*.pth
+*.pt
+*.pkl
+*.h5
+*.onnx
+*.tflite
+*.pb
+
+# Dataset files
+*.zip
+*.tar.gz
+*.tar
+*.7z
+dacl10k_dataset/
+data/
+datasets/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# PyCharm
+.idea/
+
+# VS Code
+.vscode/
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp
+temp/
+tmp/
