@@ -1,3 +1,12 @@
+## 🚀 Repository Update Notice
+
+**This repository has been updated and moved to a new location:**
+**[https://github.com/aravindsairam001/updated_project_bridge](https://github.com/aravindsairam001/updated_project_bridge)**
+
+For the latest code, improvements, and updates, please visit the new repository.
+
+---
+
 # DACL10K Defect Segmentation - DeepLabV3+ ResNet101
 
 A deep learning project for concrete defect detection and segmentation using DeepLabV3+ architecture (with ResNet101 encoder) trained on the DACL10K dataset.
