@@ -59,8 +59,8 @@ DEFECT_ALIASES = {
 
 # Alias colors - same color for aliased defects
 ALIAS_COLORS = {
-    "Honeycombing": (255, 165, 0),  # Orange for both Cavity and Hollowareas
-    "Leaching": (0, 255, 255)       # Cyan for both Weathering and Efflorescence
+    "Honeycombing": (255, 165, 0),  # Orange
+    "Leaching": (0, 255, 255)       # Cyan
 }
 
 # Only process these classes (same as LABEL_MAP in min_class.py)
@@ -351,9 +351,7 @@ def main():
     
     if not available_models:
         available_models = [
-            "dacl10k_unetplusplus_efficientnet_b5_ver1.pth",
-            "dacl10k_fpn_se_resnext101_32x4d_ver1.pth", 
-            "dacl10k_deeplabv3plus_resnext101_32x8d_ver1.pth"
+            "No models found. Please train a model first.",
         ]
     
     model_path = st.sidebar.selectbox(
@@ -366,16 +364,16 @@ def main():
     if model_path:
         filename = model_path.lower()
         if 'unetplusplus' in filename:
-            arch_info = "🏆 UNet++ - Best for fine crack detection"
+            arch_info = "🏆 UNet++"
         elif 'fpn' in filename:
-            arch_info = "🔍 FPN - Great for multi-scale defects"
+            arch_info = "🔍 FPN"
         elif 'linknet' in filename:
-            arch_info = "⚡ LinkNet - Fast and efficient"
+            arch_info = "⚡ LinkNet"
         elif 'pspnet' in filename:
-            arch_info = "🧠 PSPNet - Good contextual understanding"
+            arch_info = "🧠 PSPNet"
         else:
-            arch_info = "🔧 DeepLabV3Plus - General purpose"
-        
+            arch_info = "🔧 DeepLabV3Plus"
+
         st.sidebar.info(arch_info)
     
     st.sidebar.header("🎛️ Visualization Settings")
@@ -454,7 +452,7 @@ def main():
             # Get present classes
             present_classes = np.unique(mask)
         
-        # Get detected defects for dynamic visibility controls (outside spinner)
+        # Get detected defects for dynamic visibility controls
         detected_defects = []
         for class_id in present_classes:
             if class_id == 0 or class_id not in ALLOWED_CLASS_IDS:
@@ -472,8 +470,8 @@ def main():
             
             if display_name not in detected_defects:
                 detected_defects.append(display_name)
-        
-        # Create dynamic defect visibility controls in sidebar (outside spinner)
+
+        # Create dynamic defect visibility controls in sidebar
         defect_visibility = {}
         if detected_defects:
             st.sidebar.subheader("🔍 Detected Defects Visibility")
@@ -500,8 +498,8 @@ def main():
             st.sidebar.info("No defects detected above threshold")
             # Set empty visibility dict when no defects detected
             defect_visibility = {}
-        
-        # Create visualizations (outside spinner)
+
+        # Create visualizations
         if vis_mode == "Color Overlay":
             overlay_image = create_overlay(processed_image, mask, alpha, defect_visibility)
             if show_annotations:
@@ -685,6 +683,7 @@ def main():
         with download_col2:
             # Create and download report
             report = f"""
+
 Bridge Defect Detection Report
 =============================
 
@@ -724,11 +723,11 @@ Detailed Analysis:
         - **🔴 Rust** - Metal corrosion and oxidation
         - **⚡ ACrack/Crack** - Structural cracks of various types
         - **🟣 WConccor** - Concrete corrosion 
-        - **🟠 Honeycombing** - Hollow areas and cavities in concrete (Cavity + Hollowareas)
+        - **🟠 Honeycombing** - Hollow areas and cavities in concrete
         - **🟢 Spalling** - Concrete surface deterioration
         - **🟡 Rockpocket** - Air voids in concrete
         - **🟢 ExposedRebars** - Visible reinforcement bars
-        - **🔵 Leaching** - Environmental damage and efflorescence (Weathering + Efflorescence)
+        - **🔵 Leaching** - Environmental damage and efflorescence
         """)
         # ### 🎯 Model Features:
         # - **Multi-Architecture Support**: UNet++, FPN, LinkNet, PSPNet, DeepLabV3Plus
