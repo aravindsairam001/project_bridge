@@ -62,10 +62,10 @@ class DACL10KDataset(Dataset):
         
         for img_file in all_images:
             img_path = os.path.join(image_dir, img_file)
-            # Handle both .png and .jpg.png mask naming conventions
+            # Handle both .png, .jpg and .jpg.png mask naming conventions
             mask_file = img_file.replace(".jpg", ".png") if not img_file.endswith(".jpg.png") else img_file + ".png"
             if img_file.endswith(".jpg"):
-                mask_file = img_file + ".png"  # For dacl10k_v2_train_XXXX.jpg -> dacl10k_v2_train_XXXX.jpg.png
+                mask_file = img_file + ".png"
             mask_path = os.path.join(mask_dir, mask_file)
             
             # Only include if both image and mask exist
@@ -102,7 +102,6 @@ class DACL10KDataset(Dataset):
 
         return image, mask.long()
 
-# -------- Transforms Optimized for Internet Images --------
 def get_train_transform():
     return A.Compose([
         A.Resize(IMAGE_SIZE, IMAGE_SIZE),
@@ -113,7 +112,7 @@ def get_train_transform():
         
         # Basic Geometric Augmentations (conservative for internet images)
         A.HorizontalFlip(p=0.5),
-        A.Rotate(limit=15, p=0.3),  # Small rotations only
+        A.Rotate(limit=15, p=0.3),
         
         # Color and Lighting Adjustments (common in internet images)
         A.RandomBrightnessContrast(
@@ -128,14 +127,14 @@ def get_train_transform():
             p=0.5
         ),
         
-        # Handle Different Image Qualities from Internet
+        # Handle Different Image Qualities
         A.OneOf([
             A.GaussNoise(noise_scale_factor=0.1, p=0.3),  # Handle noisy images
             A.ISONoise(color_shift=(0.01, 0.05), intensity=(0.1, 0.5), p=0.3),  # ISO noise
             A.ImageCompression(quality_lower=70, quality_upper=100, p=0.4),  # JPEG compression
         ], p=0.4),
-        
-        # Exposure and Gamma Corrections (common internet image issues)
+
+        # Exposure and Gamma Corrections
         A.RandomGamma(gamma_limit=(80, 120), p=0.3),
         A.OneOf([
             A.RGBShift(r_shift_limit=15, g_shift_limit=15, b_shift_limit=15, p=0.3),
@@ -152,7 +151,7 @@ def get_val_transform():
     return A.Compose([
         A.Resize(IMAGE_SIZE, IMAGE_SIZE),
         
-        # Quality enhancement for validation (consistent preprocessing)
+        # Quality enhancement for validation
         A.CLAHE(clip_limit=2.0, tile_grid_size=(8, 8), p=1.0),  # Always enhance contrast
         
         A.Normalize(mean=(0.485, 0.456, 0.406),
@@ -234,7 +233,7 @@ def create_model(architecture, encoder_name, num_classes):
     """Create model based on architecture choice"""
     
     if architecture == 'unetplusplus':
-        # UNet++ - Best for detailed boundary detection (excellent for cracks)
+        # UNet++ - Best for detailed boundary detection
         model = smp.UnetPlusPlus(
             encoder_name=encoder_name,
             encoder_weights=ENCODER_WEIGHTS,
