@@ -30,7 +30,7 @@ signal.signal(signal.SIGTERM, handle_kill_signal)  # kill command
 # Optimized for training on internet bridge images
 # Focus: Image quality enhancement rather than real-world simulation
 NUM_CLASSES = 12  # 11 defect classes + background (matching minimal class subset)
-BATCH_SIZE = 4    # Reduced for larger models (EfficientNet/ConvNeXt)
+BATCH_SIZE = 2    # Reduced for larger models (EfficientNet/ConvNeXt)
 NUM_EPOCHS = 100   # Sufficient for convergence on internet images
 IMAGE_SIZE = 512
 DATASET_DIR = 'Datasets/dacl10k_ninja'
@@ -38,7 +38,7 @@ DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 # Architecture Options (choose one):
 ARCHITECTURE = 'unetplusplus'  # Options: 'deeplabv3plus', 'unetplusplus', 'fpn', 'linknet', 'pspnet'
-ENCODER_NAME = 'efficientnet-b5'  # Better options: 'efficientnet-b5', 'resnext101_32x8d', 'se_resnext101_32x4d'
+ENCODER_NAME = 'efficientnet-b7'  # Better options: 'efficientnet-b7', 'resnext101_32x8d', 'se_resnext101_32x4d'
 ENCODER_WEIGHTS = 'imagenet'
 
 MODEL_SAVE_PATH = f'dacl10k_{ARCHITECTURE}_{ENCODER_NAME.replace("-", "_")}_ver1.pth'

@@ -729,61 +729,61 @@ Detailed Analysis:
         - **🟡 Rockpocket** - Air voids in concrete
         - **🟢 ExposedRebars** - Visible reinforcement bars
         - **🔵 Leaching** - Environmental damage and efflorescence (Weathering + Efflorescence)
-        
-        ### 🎯 Model Features:
-        - **Multi-Architecture Support**: UNet++, FPN, LinkNet, PSPNet, DeepLabV3Plus
-        - **Advanced Encoders**: EfficientNet, ResNeXt, SE-ResNeXt
-        - **Intelligent Filtering**: Configurable pixel thresholds
-        - **Alias Grouping**: Related defects grouped with consistent colors
-        - **High Accuracy**: Optimized for bridge infrastructure inspection
         """)
+        # ### 🎯 Model Features:
+        # - **Multi-Architecture Support**: UNet++, FPN, LinkNet, PSPNet, DeepLabV3Plus
+        # - **Advanced Encoders**: EfficientNet, ResNeXt, SE-ResNeXt
+        # - **Intelligent Filtering**: Configurable pixel thresholds
+        # - **Alias Grouping**: Related defects grouped with consistent colors
+        # - **High Accuracy**: Optimized for bridge infrastructure inspection
+        # 
         
-        # Model performance info
-        st.markdown("""
-        ### 📈 Performance Highlights:
-        - **🏆 UNet++**: Best for fine crack detection
-        - **🔍 FPN**: Excellent for multi-scale defects  
-        - **⚡ LinkNet**: Fastest processing
-        - **🧠 PSPNet**: Superior contextual understanding
-        - **🎯 EfficientNet**: Optimal accuracy/efficiency balance
-        """)
+        # # Model performance info
+        # st.markdown("""
+        # ### 📈 Performance Highlights:
+        # - **🏆 UNet++**: Best for fine crack detection
+        # - **🔍 FPN**: Excellent for multi-scale defects  
+        # - **⚡ LinkNet**: Fastest processing
+        # - **🧠 PSPNet**: Superior contextual understanding
+        # - **🎯 EfficientNet**: Optimal accuracy/efficiency balance
+        # """)
 
-    # Color Legend
-    with st.expander("🎨 Defect Color Legend", expanded=False):
-        legend_cols = st.columns(3)
+    # # Color Legend
+    # with st.expander("🎨 Defect Color Legend", expanded=False):
+    #     legend_cols = st.columns(3)
         
-        defect_info = [
-            ("Rust", CLASS_COLORS[1], "Metal corrosion"),
-            ("ACrack", CLASS_COLORS[2], "Structural cracks"), 
-            ("WConccor", CLASS_COLORS[3], "Concrete corrosion"),
-            ("Honeycombing", ALIAS_COLORS["Honeycombing"], "Cavities & hollow areas"),
-            ("Spalling", CLASS_COLORS[6], "Surface deterioration"),
-            ("Rockpocket", CLASS_COLORS[7], "Air voids"),
-            ("ExposedRebars", CLASS_COLORS[8], "Visible reinforcement"),
-            ("Crack", CLASS_COLORS[9], "General cracks"),
-            ("Leaching", ALIAS_COLORS["Leaching"], "Environmental damage")
-        ]
+    #     defect_info = [
+    #         ("Rust", CLASS_COLORS[1], "Metal corrosion"),
+    #         ("ACrack", CLASS_COLORS[2], "Structural cracks"), 
+    #         ("WConccor", CLASS_COLORS[3], "Concrete corrosion"),
+    #         ("Honeycombing", ALIAS_COLORS["Honeycombing"], "Cavities & hollow areas"),
+    #         ("Spalling", CLASS_COLORS[6], "Surface deterioration"),
+    #         ("Rockpocket", CLASS_COLORS[7], "Air voids"),
+    #         ("ExposedRebars", CLASS_COLORS[8], "Visible reinforcement"),
+    #         ("Crack", CLASS_COLORS[9], "General cracks"),
+    #         ("Leaching", ALIAS_COLORS["Leaching"], "Environmental damage")
+    #     ]
         
-        for idx, (name, color, desc) in enumerate(defect_info):
-            col_idx = idx % 3
-            with legend_cols[col_idx]:
-                st.markdown(
-                    f"""
-                    <div style="
-                        background-color: rgb({color[0]}, {color[1]}, {color[2]});
-                        padding: 8px;
-                        border-radius: 4px;
-                        margin: 2px 0;
-                        color: {'white' if sum(color) < 400 else 'black'};
-                        text-align: center;
-                        font-size: 12px;
-                    ">
-                        <strong>{name}</strong><br>
-                        <small>{desc}</small>
-                    </div>
-                    """,
-                    unsafe_allow_html=True
-                )
+    #     for idx, (name, color, desc) in enumerate(defect_info):
+    #         col_idx = idx % 3
+    #         with legend_cols[col_idx]:
+    #             st.markdown(
+    #                 f"""
+    #                 <div style="
+    #                     background-color: rgb({color[0]}, {color[1]}, {color[2]});
+    #                     padding: 8px;
+    #                     border-radius: 4px;
+    #                     margin: 2px 0;
+    #                     color: {'white' if sum(color) < 400 else 'black'};
+    #                     text-align: center;
+    #                     font-size: 12px;
+    #                 ">
+    #                     <strong>{name}</strong><br>
+    #                     <small>{desc}</small>
+    #                 </div>
+    #                 """,
+    #                 unsafe_allow_html=True
+    #             )
 
 if __name__ == "__main__":
     main()
