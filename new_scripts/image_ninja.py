@@ -168,7 +168,7 @@ if __name__ == "__main__":
     present_classes = np.unique(mask)
     present_labels = []
     
-    # Map class id to readable label (matching LABEL_MAP from json_mask_min_class.py)
+    # Map class id to readable label
     CLASS_LABELS = {
         0: "Background",
         1: "Rust", 
@@ -184,7 +184,7 @@ if __name__ == "__main__":
         11: "Efflorescence"
     }
     
-    # Aliases for output (based on new class IDs)
+    # Aliases for output
     DEFECT_ALIASES = {
         4: "Honeycombing",   # Cavity
         5: "Honeycombing",   # Hollowareas
