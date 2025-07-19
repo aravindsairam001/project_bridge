@@ -5,7 +5,7 @@ import cv2
 from tqdm import tqdm
 
 
-# Map class names to integer IDs - UPDATED TO MATCH ACTUAL DATASET
+# Map class names to integer IDs
 # These are the actual labels found in your JSON files
 LABEL_MAP = {
     'alligator crack': 1,
@@ -29,7 +29,7 @@ LABEL_MAP = {
     'wetspot': 19,
 }
 
-# Subset mapping for minimal classes (if you want to use only specific defects)
+# Subset mapping for minimal classes
 MINIMAL_LABEL_MAP = {
     'rust': 1,
     'alligator crack': 2,  # ACrack equivalent
@@ -64,7 +64,7 @@ def convert_labelme_json(json_path, out_mask_path):
 
     mask = np.zeros((height, width), dtype=np.uint8)
 
-    # DACL10K format: 'objects', 'classTitle', 'points'->'exterior'
+    # Fill mask based on objects
     for obj in data.get('objects', []):
         label = obj['classTitle'].strip().lower()  # Convert to lowercase for matching
         if label not in ACTIVE_LABEL_MAP:
@@ -101,7 +101,6 @@ def print_dataset_info():
     print(f"   ALLOWED_CLASS_IDS = set([{', '.join(map(str, range(1, len(ACTIVE_LABEL_MAP) + 1)))}])")
     print("=" * 60)
 
-# Example usage
 def main():
     # Get the JSON directory from user
     print_dataset_info()
