@@ -10,6 +10,14 @@ import matplotlib.pyplot as plt
 import os
 import io
 
+# Import centralized configuration
+from config import (
+    CLASS_COLORS, CLASS_LABELS, DEFECT_ALIASES, ALIAS_COLORS, 
+    ALIAS_COLORS_OVERLAY, ALLOWED_CLASS_IDS, NUM_CLASSES,
+    detect_architecture_from_filename, get_architecture_display_info,
+    get_alias_color, get_display_name, rgb_to_bgr
+)
+
 # Configure page
 st.set_page_config(
     page_title="Bridge Defect Detection",
@@ -18,97 +26,13 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Class colors and labels (updated for minimal class subset with aliases)
-CLASS_COLORS = {
-    0: (0, 0, 0),           # 0: background (black)
-    1: (255, 0, 0),         # 1: Rust (bright red)
-    2: (255, 255, 0),       # 2: ACrack (yellow)
-    3: (255, 0, 255),       # 3: WConccor (magenta)
-    4: (0, 255, 255),       # 4: Cavity (cyan)
-    5: (255, 128, 0),       # 5: Hollowareas (orange)
-    6: (0, 255, 128),       # 6: Spalling (spring green)
-    7: (255, 0, 128),       # 7: Rockpocket (rose)
-    8: (128, 255, 0),       # 8: ExposedRebars (lime)
-    9: (0, 128, 255),       # 9: Crack (azure)
-    10: (128, 255, 255),    # 10: Weathering (light cyan)
-    11: (255, 128, 192),    # 11: Efflorescence (light pink)
-}
-
-CLASS_LABELS = {
-    0: "Background",
-    1: "Rust", 
-    2: "ACrack",
-    3: "WConccor", 
-    4: "Cavity",
-    5: "Hollowareas",
-    6: "Spalling",
-    7: "Rockpocket",
-    8: "ExposedRebars",
-    9: "Crack",
-    10: "Weathering",
-    11: "Efflorescence"
-}
-
-# Aliases for output with consistent colors
-DEFECT_ALIASES = {
-    4: "Honeycombing",   # Cavity
-    5: "Honeycombing",   # Hollowareas
-    10: "Leaching",      # Weathering
-    11: "Leaching"       # Efflorescence
-}
-
-# Alias colors - same color for aliased defects
-ALIAS_COLORS = {
-    "Honeycombing": (255, 165, 0),  # Orange
-    "Leaching": (0, 255, 255)       # Cyan
-}
-
-# Only process these classes (same as LABEL_MAP in min_class.py)
-ALLOWED_CLASS_IDS = set([1,2,3,4,5,6,7,8,9,10,11])
-
 @st.cache_resource
 def load_model(weights_path, architecture=None, encoder_name=None):
     """Load model with auto-detection or specified architecture"""
     try:
         # Auto-detect architecture from filename if not specified
         if architecture is None or encoder_name is None:
-            filename = os.path.basename(weights_path).lower()
-            
-            # Detect architecture
-            if 'unetplusplus' in filename:
-                architecture = 'unetplusplus'
-            elif 'fpn' in filename:
-                architecture = 'fpn'
-            elif 'linknet' in filename:
-                architecture = 'linknet'
-            elif 'pspnet' in filename:
-                architecture = 'pspnet'
-            else:
-                architecture = 'deeplabv3plus'  # default
-            
-            # Detect encoder
-            if 'efficientnet_b' in filename:
-                if 'b7' in filename:
-                    encoder_name = 'efficientnet-b7'
-                elif 'b6' in filename:
-                    encoder_name = 'efficientnet-b6'
-                elif 'b5' in filename:
-                    encoder_name = 'efficientnet-b5'
-                elif 'b4' in filename:
-                    encoder_name = 'efficientnet-b4'
-                elif 'b3' in filename:
-                    encoder_name = 'efficientnet-b3'
-                else:
-                    encoder_name = 'efficientnet-b5'
-            elif 'resnext101' in filename:
-                if 'se_resnext101_32x4d' in filename:
-                    encoder_name = 'se_resnext101_32x4d'
-                else:
-                    encoder_name = 'resnext101_32x8d'
-            elif 'resnet50' in filename:
-                encoder_name = 'resnet50'
-            else:
-                encoder_name = 'resnet101'  # fallback
+            architecture, encoder_name = detect_architecture_from_filename(weights_path)
         
         st.info(f"🏗️ Loading {architecture.upper()} model with {encoder_name} encoder...")
         
@@ -118,35 +42,35 @@ def load_model(weights_path, architecture=None, encoder_name=None):
                 encoder_name=encoder_name,
                 encoder_weights='imagenet',
                 in_channels=3,
-                classes=12  # 11 defect classes + background
+                classes=NUM_CLASSES
             )
         elif architecture == 'fpn':
             model = smp.FPN(
                 encoder_name=encoder_name,
                 encoder_weights='imagenet',
                 in_channels=3,
-                classes=12
+                classes=NUM_CLASSES
             )
         elif architecture == 'linknet':
             model = smp.Linknet(
                 encoder_name=encoder_name,
                 encoder_weights='imagenet',
                 in_channels=3,
-                classes=12
+                classes=NUM_CLASSES
             )
         elif architecture == 'pspnet':
             model = smp.PSPNet(
                 encoder_name=encoder_name,
                 encoder_weights='imagenet',
                 in_channels=3,
-                classes=12
+                classes=NUM_CLASSES
             )
         else:  # deeplabv3plus
             model = smp.DeepLabV3Plus(
                 encoder_name=encoder_name,
                 encoder_weights='imagenet',
                 in_channels=3,
-                classes=12
+                classes=NUM_CLASSES
             )
         
         # Load weights
@@ -201,14 +125,6 @@ def create_overlay(image, mask, alpha=0.6, defect_visibility=None):
     image_bgr = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
     overlay = np.zeros_like(image_bgr)
     
-    # Define alias colors for consistent visualization
-    ALIAS_COLORS_OVERLAY = {
-        4: (255, 165, 0),   # Honeycombing (Cavity) - Orange
-        5: (255, 165, 0),   # Honeycombing (Hollowareas) - Orange  
-        10: (0, 255, 255),  # Leaching (Weathering) - Cyan
-        11: (0, 255, 255)   # Leaching (Efflorescence) - Cyan
-    }
-    
     # Apply colors for each class
     for class_id, color in CLASS_COLORS.items():
         if class_id == 0:  # Always show background
@@ -216,22 +132,13 @@ def create_overlay(image, mask, alpha=0.6, defect_visibility=None):
             
         # Check if this defect should be visible
         if defect_visibility is not None:
-            if class_id in DEFECT_ALIASES:
-                display_name = DEFECT_ALIASES[class_id]
-            else:
-                display_name = CLASS_LABELS.get(class_id, f"Class {class_id}")
-            
+            display_name = get_display_name(class_id)
             if not defect_visibility.get(display_name, True):
                 continue  # Skip this defect if not visible
         
-        if class_id in ALIAS_COLORS_OVERLAY:
-            # Use alias color for aliased defects
-            bgr_color = (ALIAS_COLORS_OVERLAY[class_id][2], 
-                        ALIAS_COLORS_OVERLAY[class_id][1], 
-                        ALIAS_COLORS_OVERLAY[class_id][0])
-        else:
-            # Convert RGB to BGR for OpenCV
-            bgr_color = (color[2], color[1], color[0])
+        # Get appropriate color (alias or regular)
+        overlay_color = get_alias_color(class_id)
+        bgr_color = rgb_to_bgr(overlay_color)
         overlay[mask == class_id] = bgr_color
     
     # Blend images
@@ -249,14 +156,6 @@ def create_annotated_image(image, mask, present_classes, pixel_threshold=1000, d
     y0, dy = 30, 30
     label_count = 0
     
-    # Use same alias colors as overlay for consistency
-    ALIAS_COLORS_OVERLAY = {
-        4: (255, 165, 0),   # Honeycombing (Cavity) - Orange
-        5: (255, 165, 0),   # Honeycombing (Hollowareas) - Orange  
-        10: (0, 255, 255),  # Leaching (Weathering) - Cyan
-        11: (0, 255, 255)   # Leaching (Efflorescence) - Cyan
-    }
-    
     for class_id in present_classes:
         if class_id == 0 or class_id not in ALLOWED_CLASS_IDS:
             continue  # skip background and unwanted classes
@@ -264,11 +163,8 @@ def create_annotated_image(image, mask, present_classes, pixel_threshold=1000, d
         if pixel_coverage <= pixel_threshold:
             continue  # skip small regions
             
-        # Use alias if available, but uniform text color
-        if class_id in DEFECT_ALIASES:
-            label = DEFECT_ALIASES[class_id]
-        else:
-            label = CLASS_LABELS.get(class_id, f"Class {class_id}")
+        # Get display name (with alias if available)
+        label = get_display_name(class_id)
         
         # Check if this defect should be visible
         if defect_visibility is not None:
@@ -278,7 +174,7 @@ def create_annotated_image(image, mask, present_classes, pixel_threshold=1000, d
         y = y0 + label_count * dy
         # Use uniform white color for all text labels
         uniform_text_color = (255, 255, 255)  # White text
-        bgr_color = (int(uniform_text_color[2]), int(uniform_text_color[1]), int(uniform_text_color[0]))
+        bgr_color = rgb_to_bgr(uniform_text_color)
         cv2.putText(annotated, label, (20, y), font, font_scale, bgr_color, thickness, cv2.LINE_AA)
         label_count += 1
     return annotated
@@ -287,14 +183,6 @@ def analyze_defects(mask, present_classes, pixel_threshold=1000, defect_visibili
     """Analyze defects with alias-based grouping and filtering"""
     stats = {}
     total_pixels = mask.shape[0] * mask.shape[1]
-    
-    # Use same alias colors as overlay for consistency
-    ALIAS_COLORS_OVERLAY = {
-        4: (255, 165, 0),   # Honeycombing (Cavity) - Orange
-        5: (255, 165, 0),   # Honeycombing (Hollowareas) - Orange  
-        10: (0, 255, 255),  # Leaching (Weathering) - Cyan
-        11: (0, 255, 255)   # Leaching (Efflorescence) - Cyan
-    }
     
     for class_id in present_classes:
         if class_id == 0 or class_id not in ALLOWED_CLASS_IDS:
@@ -305,17 +193,9 @@ def analyze_defects(mask, present_classes, pixel_threshold=1000, defect_visibili
             
         percentage = (class_pixels / total_pixels) * 100
         
-        # Use alias if available, with same colors as overlay
-        if class_id in DEFECT_ALIASES:
-            label = DEFECT_ALIASES[class_id]
-            # Use overlay colors for consistency
-            if class_id in ALIAS_COLORS_OVERLAY:
-                color = ALIAS_COLORS_OVERLAY[class_id]
-            else:
-                color = CLASS_COLORS.get(class_id, (255, 255, 255))
-        else:
-            label = CLASS_LABELS.get(class_id, f"Class {class_id}")
-            color = CLASS_COLORS.get(class_id, (255, 255, 255))
+        # Get display name and color (with alias if available)
+        label = get_display_name(class_id)
+        color = get_alias_color(class_id)
         
         # Check if this defect should be visible
         if defect_visibility is not None:
@@ -362,18 +242,7 @@ def main():
     
     # Display model info
     if model_path:
-        filename = model_path.lower()
-        if 'unetplusplus' in filename:
-            arch_info = "🏆 UNet++"
-        elif 'fpn' in filename:
-            arch_info = "🔍 FPN"
-        elif 'linknet' in filename:
-            arch_info = "⚡ LinkNet"
-        elif 'pspnet' in filename:
-            arch_info = "🧠 PSPNet"
-        else:
-            arch_info = "🔧 DeepLabV3Plus"
-
+        arch_info = get_architecture_display_info(detect_architecture_from_filename(model_path)[0])
         st.sidebar.info(arch_info)
     
     st.sidebar.header("🎛️ Visualization Settings")
@@ -462,11 +331,8 @@ def main():
             if pixel_coverage <= pixel_threshold:
                 continue
             
-            # Get display name
-            if class_id in DEFECT_ALIASES:
-                display_name = DEFECT_ALIASES[class_id]
-            else:
-                display_name = CLASS_LABELS.get(class_id, f"Class {class_id}")
+            # Get display name (with alias if available)
+            display_name = get_display_name(class_id)
             
             if display_name not in detected_defects:
                 detected_defects.append(display_name)
@@ -509,14 +375,6 @@ def main():
         else:  # Bounding Box mode
             annotated_image = processed_image.copy()
             
-            # Use same alias colors as overlay for consistency
-            ALIAS_COLORS_OVERLAY = {
-                4: (255, 165, 0),   # Honeycombing (Cavity) - Orange
-                5: (255, 165, 0),   # Honeycombing (Hollowareas) - Orange  
-                10: (0, 255, 255),  # Leaching (Weathering) - Cyan
-                11: (0, 255, 255)   # Leaching (Efflorescence) - Cyan
-            }
-            
             # Draw bounding boxes for each defect class
             for class_id in present_classes:
                 if class_id == 0 or class_id not in ALLOWED_CLASS_IDS:
@@ -525,11 +383,8 @@ def main():
                 if pixel_coverage <= pixel_threshold:
                     continue  # skip small regions
                     
-                # Get label, but use uniform color for bounding boxes and text
-                if class_id in DEFECT_ALIASES:
-                    label = DEFECT_ALIASES[class_id]
-                else:
-                    label = CLASS_LABELS.get(class_id, f"Class {class_id}")
+                # Get display name (with alias if available)
+                label = get_display_name(class_id)
                 
                 # Check if this defect should be visible
                 if defect_visibility and not defect_visibility.get(label, True):
@@ -551,45 +406,10 @@ def main():
                     # Add label above the box with uniform color
                     cv2.putText(annotated_image, label, (x, y-10), 
                               cv2.FONT_HERSHEY_SIMPLEX, 0.6, uniform_bbox_color, 2, cv2.LINE_AA)
+            
             # Show class labels on the left margin if enabled
             if show_annotations:
-                font = cv2.FONT_HERSHEY_SIMPLEX
-                font_scale = 0.7
-                thickness = 2
-                y0, dy = 30, 30
-                label_count = 0
-                
-                # Use same alias colors as overlay for consistency
-                ALIAS_COLORS_OVERLAY = {
-                    4: (255, 165, 0),   # Honeycombing (Cavity) - Orange
-                    5: (255, 165, 0),   # Honeycombing (Hollowareas) - Orange  
-                    10: (0, 255, 255),  # Leaching (Weathering) - Cyan
-                    11: (0, 255, 255)   # Leaching (Efflorescence) - Cyan
-                }
-                
-                for class_id in present_classes:
-                    if class_id == 0 or class_id not in ALLOWED_CLASS_IDS:
-                        continue  # skip background and unwanted classes
-                    pixel_coverage = np.sum(mask == class_id)
-                    if pixel_coverage <= pixel_threshold:
-                        continue  # skip small regions
-                        
-                    # Use alias if available, but uniform text color
-                    if class_id in DEFECT_ALIASES:
-                        label = DEFECT_ALIASES[class_id]
-                    else:
-                        label = CLASS_LABELS.get(class_id, f"Class {class_id}")
-                    
-                    # Check if this defect should be visible
-                    if defect_visibility and not defect_visibility.get(label, True):
-                        continue  # Skip this defect if not visible
-                    
-                    y = y0 + label_count * dy
-                    # Use uniform white color for all text labels
-                    uniform_text_color = (255, 255, 255)  # White text
-                    bgr_color = (int(uniform_text_color[2]), int(uniform_text_color[1]), int(uniform_text_color[0]))
-                    cv2.putText(annotated_image, label, (20, y), font, font_scale, bgr_color, thickness, cv2.LINE_AA)
-                    label_count += 1
+                annotated_image = create_annotated_image(annotated_image, mask, present_classes, pixel_threshold, defect_visibility)
         
         with col2:
             st.subheader("🔍 Defect Detection Results")
@@ -718,17 +538,18 @@ Detailed Analysis:
         3. **👁️ View results** showing detected defects with color-coded overlays or bounding boxes
         4. **📊 Analyze statistics** to understand the severity and coverage of defects
         5. **💾 Download results** including annotated images and analysis reports
-        
-        ### 🏗️ Supported Defect Types:
-        - **🔴 Rust** - Metal corrosion and oxidation
-        - **⚡ ACrack/Crack** - Structural cracks of various types
-        - **🟣 WConccor** - Concrete corrosion 
-        - **🟠 Honeycombing** - Hollow areas and cavities in concrete
-        - **🟢 Spalling** - Concrete surface deterioration
-        - **🟡 Rockpocket** - Air voids in concrete
-        - **🟢 ExposedRebars** - Visible reinforcement bars
-        - **🔵 Leaching** - Environmental damage and efflorescence
         """)
+        
+        # ### 🏗️ Supported Defect Types:
+        # - **🔴 Rust** - Metal corrosion and oxidation
+        # - **⚡ ACrack/Crack** - Structural cracks of various types
+        # - **🟣 WConccor** - Concrete corrosion 
+        # - **🟠 Honeycombing** - Hollow areas and cavities in concrete
+        # - **🟢 Spalling** - Concrete surface deterioration
+        # - **🟡 Rockpocket** - Air voids in concrete
+        # - **🟢 ExposedRebars** - Visible reinforcement bars
+        # - **🔵 Leaching** - Environmental damage and efflorescence
+                    
         # ### 🎯 Model Features:
         # - **Multi-Architecture Support**: UNet++, FPN, LinkNet, PSPNet, DeepLabV3Plus
         # - **Advanced Encoders**: EfficientNet, ResNeXt, SE-ResNeXt

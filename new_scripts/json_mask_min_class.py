@@ -4,49 +4,12 @@ import numpy as np
 import cv2
 from tqdm import tqdm
 
-
-# Map class names to integer IDs
-# These are the actual labels found in your JSON files
-LABEL_MAP = {
-    'alligator crack': 1,
-    'bearing': 2,
-    'cavity': 3,
-    'crack': 4,
-    'drainage': 5,
-    'efflorescence': 6,
-    'expansion joint': 7,
-    'exposed rebars': 8,
-    'graffiti': 9,
-    'hollowareas': 10,
-    'joint tape': 11,
-    'protective equipment': 12,
-    'restformwork': 13,
-    'rockpocket': 14,
-    'rust': 15,
-    'spalling': 16,
-    'washouts/concrete corrosion': 17,
-    'weathering': 18,
-    'wetspot': 19,
-}
-
-# Subset mapping for minimal classes
-MINIMAL_LABEL_MAP = {
-    'rust': 1,
-    'alligator crack': 2,  # ACrack equivalent
-    'washouts/concrete corrosion': 3,  # WConccor equivalent
-    'cavity': 4,
-    'hollowareas': 5,
-    'spalling': 6,
-    'rockpocket': 7,
-    'exposed rebars': 8,
-    'crack': 9,
-    'weathering': 10,
-    'efflorescence': 11
-}
-
-# Choose which mapping to use
-USE_MINIMAL_SET = True  # Set to False to use all 19 classes
-ACTIVE_LABEL_MAP = MINIMAL_LABEL_MAP if USE_MINIMAL_SET else LABEL_MAP
+# Import centralized configuration
+from config import (
+    ACTIVE_LABEL_MAP, NUM_CLASSES, ALLOWED_CLASS_IDS, 
+    MINIMAL_LABEL_MAP, DACL10K_FULL_LABEL_MAP as LABEL_MAP, USE_MINIMAL_SET,
+    print_dataset_info, validate_configuration
+)
 
 def convert_labelme_json(json_path, out_mask_path):
     with open(json_path) as f:
@@ -77,32 +40,8 @@ def convert_labelme_json(json_path, out_mask_path):
 
     cv2.imwrite(out_mask_path, mask)
 
-def print_dataset_info():
-    """Print information about the current dataset configuration"""
-    print("=" * 60)
-    print("DATASET CONFIGURATION")
-    print("=" * 60)
-    
-    if USE_MINIMAL_SET:
-        print("🎯 Using MINIMAL class set (11 defects + background)")
-        print(f"📊 Total classes: {len(MINIMAL_LABEL_MAP) + 1}")
-        print("🏷️  Included defects:")
-        for label, class_id in MINIMAL_LABEL_MAP.items():
-            print(f"   {class_id}: {label}")
-    else:
-        print("🎯 Using FULL class set (19 defects + background)")
-        print(f"📊 Total classes: {len(LABEL_MAP) + 1}")
-        print("🏷️  Included defects:")
-        for label, class_id in LABEL_MAP.items():
-            print(f"   {class_id}: {label}")
-    
-    print("\n🔧 For training, use:")
-    print(f"   NUM_CLASSES = {len(ACTIVE_LABEL_MAP) + 1}")
-    print(f"   ALLOWED_CLASS_IDS = set([{', '.join(map(str, range(1, len(ACTIVE_LABEL_MAP) + 1)))}])")
-    print("=" * 60)
-
 def main():
-    # Get the JSON directory from user
+    # Print dataset configuration info
     print_dataset_info()
     
     json_dir = input("\nEnter JSON directory path: ").strip()

@@ -9,101 +9,57 @@ import segmentation_models_pytorch as smp
 import matplotlib.pyplot as plt
 import os
 
-# Class-color mapping for minimal class subset (11 classes + background)
-# Based on LABEL_MAP from json_mask_min_class.py
-CLASS_COLORS = {
-    0: (0, 0, 0),           # 0: background (black)
-    1: (255, 0, 0),         # 1: Rust (bright red)
-    2: (255, 255, 0),       # 2: ACrack (yellow)
-    3: (255, 0, 255),       # 3: WConccor (magenta)
-    4: (0, 255, 255),       # 4: Cavity (cyan)
-    5: (255, 128, 0),       # 5: Hollowareas (orange)
-    6: (0, 255, 128),       # 6: Spalling (spring green)
-    7: (255, 0, 128),       # 7: Rockpocket (rose)
-    8: (128, 255, 0),       # 8: ExposedRebars (lime)
-    9: (0, 128, 255),       # 9: Crack (azure)
-    10: (128, 255, 255),    # 10: Weathering (light cyan)
-    11: (255, 128, 192),    # 11: Efflorescence (light pink)
-}
+# Import centralized configuration
+from config import (
+    CLASS_COLORS, CLASS_LABELS, ALLOWED_CLASS_IDS, NUM_CLASSES,
+    detect_architecture_from_filename, get_display_name, rgb_to_bgr
+)
 
 # Load the model - Auto-detect architecture from filename
 def load_model(weights_path):
     """Load model and auto-detect architecture from filename"""
     
-    # Extract architecture and encoder from filename
-    filename = os.path.basename(weights_path).lower()
-    
-    if 'unetplusplus' in filename:
-        architecture = 'unetplusplus'
-    elif 'fpn' in filename:
-        architecture = 'fpn'
-    elif 'linknet' in filename:
-        architecture = 'linknet'
-    elif 'pspnet' in filename:
-        architecture = 'pspnet'
-    else:
-        architecture = 'deeplabv3plus'  # default
-    
-    # Extract encoder name
-    if 'efficientnet_b' in filename:
-        if 'b7' in filename:
-            encoder = 'efficientnet-b7'
-        elif 'b6' in filename:
-            encoder = 'efficientnet-b6'
-        elif 'b5' in filename:
-            encoder = 'efficientnet-b5'
-        elif 'b4' in filename:
-            encoder = 'efficientnet-b4'
-        elif 'b3' in filename:
-            encoder = 'efficientnet-b3'
-        else:
-            encoder = 'efficientnet-b5'  # default
-    elif 'resnext101' in filename:
-        if 'se_resnext101_32x4d' in filename:
-            encoder = 'se_resnext101_32x4d'
-        else:
-            encoder = 'resnext101_32x8d'
-    else:
-        encoder = 'resnet101'  # fallback
+    # Auto-detect architecture and encoder from filename
+    architecture, encoder_name = detect_architecture_from_filename(weights_path)
     
     print(f"[INFO] Detected architecture: {architecture.upper()}")
-    print(f"[INFO] Detected encoder: {encoder}")
+    print(f"[INFO] Detected encoder: {encoder_name}")
     
     # Create model based on detected architecture
     if architecture == 'unetplusplus':
         model = smp.UnetPlusPlus(
-            encoder_name=encoder,
+            encoder_name=encoder_name,
             encoder_weights='imagenet',
             in_channels=3,
-            classes=12
+            classes=NUM_CLASSES
         )
     elif architecture == 'fpn':
         model = smp.FPN(
-            encoder_name=encoder,
+            encoder_name=encoder_name,
             encoder_weights='imagenet',
             in_channels=3,
-            classes=12
+            classes=NUM_CLASSES
         )
     elif architecture == 'linknet':
         model = smp.Linknet(
-            encoder_name=encoder,
+            encoder_name=encoder_name,
             encoder_weights='imagenet',
             in_channels=3,
-            classes=12
+            classes=NUM_CLASSES
         )
     elif architecture == 'pspnet':
         model = smp.PSPNet(
-            encoder_name=encoder,
+            encoder_name=encoder_name,
             encoder_weights='imagenet',
             in_channels=3,
-            classes=12
+            classes=NUM_CLASSES
         )
     else:  # deeplabv3plus
         model = smp.DeepLabV3Plus(
-            encoder_name=encoder,
+            encoder_name=encoder_name,
             encoder_weights='imagenet',
             in_channels=3,
-            classes=12
+            classes=NUM_CLASSES
         )
     
     model.load_state_dict(torch.load(weights_path, map_location='cuda' if torch.cuda.is_available() else 'cpu'))
