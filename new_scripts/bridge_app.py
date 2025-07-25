@@ -1,4 +1,12 @@
 from datetime import datetime
+import warnings
+import os
+import io
+
+# Suppress warnings
+warnings.filterwarnings("ignore", category=UserWarning, module="matplotlib")
+warnings.filterwarnings("ignore", message=".*torch.classes.*")
+
 import streamlit as st
 import torch
 import torchvision.transforms as T
@@ -7,13 +15,11 @@ import numpy as np
 import cv2
 import segmentation_models_pytorch as smp
 import matplotlib.pyplot as plt
-import os
-import io
 
 # Import centralized configuration
 from config import (
-    CLASS_COLORS, CLASS_LABELS, DEFECT_ALIASES, ALIAS_COLORS, 
-    ALIAS_COLORS_OVERLAY, ALLOWED_CLASS_IDS, NUM_CLASSES,
+    CLASS_COLORS, 
+    ALLOWED_CLASS_IDS, NUM_CLASSES,
     detect_architecture_from_filename, get_architecture_display_info,
     get_alias_color, get_display_name, rgb_to_bgr
 )

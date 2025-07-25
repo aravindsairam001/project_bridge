@@ -228,28 +228,18 @@ ALLOWED_CLASS_IDS = set(range(1, NUM_CLASSES))
 MODEL_ARCHITECTURES = {
     'deeplabv3plus': {
         'display_name': 'DeepLabV3Plus',
-        'emoji': '🔧',
-        'description': 'Balanced performance and accuracy'
     },
     'unetplusplus': {
         'display_name': 'UNet++',
-        'emoji': '🏆',
-        'description': 'Best for fine crack detection'
     },
     'fpn': {
         'display_name': 'FPN',
-        'emoji': '🔍',
-        'description': 'Excellent for multi-scale defects'
     },
     'linknet': {
         'display_name': 'LinkNet',
-        'emoji': '⚡',
-        'description': 'Fastest processing'
     },
     'pspnet': {
         'display_name': 'PSPNet',
-        'emoji': '🧠',
-        'description': 'Superior contextual understanding'
     }
 }
 
@@ -356,7 +346,7 @@ def get_alias_color(class_id):
     return CLASS_COLORS.get(class_id, (255, 255, 255))
 
 def get_display_name(class_id):
-    """Get display name (with alias if available)"""
+    """Get display name """
     if class_id in DEFECT_ALIASES:
         return DEFECT_ALIASES[class_id]
     return CLASS_LABELS.get(class_id, f"Class {class_id}")

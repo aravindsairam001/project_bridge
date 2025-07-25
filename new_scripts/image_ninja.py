@@ -112,7 +112,7 @@ ALLOWED_CLASS_IDS = set([1,2,3,4,5,6,7,8,9,10,11])
 # Run
 
 if __name__ == "__main__":
-    model_path = "dacl10k_unetplusplus_efficientnet_b5_ver1.pth"  # Updated to new naming convention
+    model_path = "dacl10k_unetplusplus_efficientnet_b5_ver1.pth"
     test_image_path = "input_image.jpg"  # <-- your test image
     output_path = "prediction_overlay.jpg"
 

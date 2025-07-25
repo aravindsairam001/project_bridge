@@ -1,12 +1,6 @@
 """
-DACL10K Bridge Defect Detection - Utility Functions
-================================================
-
 Common utility functions for image processing, visualization, and model operations.
 This module provides reusable functions to keep the main scripts clean.
-
-Author: Bridge Defect Detection Project  
-Date: 2025-07-22
 """
 
 import cv2
@@ -17,8 +11,7 @@ from PIL import Image
 import segmentation_models_pytorch as smp
 
 from config import (
-    CLASS_COLORS, CLASS_LABELS, DEFECT_ALIASES, ALIAS_COLORS_OVERLAY,
-    ALLOWED_CLASS_IDS, NUM_CLASSES, get_display_name, get_alias_color, rgb_to_bgr
+    CLASS_COLORS, ALLOWED_CLASS_IDS, NUM_CLASSES, get_display_name, get_alias_color, rgb_to_bgr
 )
 
 
